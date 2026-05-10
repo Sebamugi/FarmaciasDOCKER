@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de Farmacias{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-hospital"></i> Listado de Farmacias</h2>
+    <div>
+        <a href="{{ url_for('farmacias_web') }}?abiertas=true" class="btn btn-success me-2">
+            <i class="fas fa-door-open"></i> Ver Solo Abiertas
+        </a>
+        <a href="{{ url_for('new_farmacia') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nueva Farmacia
+        </a>
+    </div>
+</div>
+
+<!-- Estadísticas en tiempo real -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-door-open fa-2x mb-2"></i>
+                <h6 class="card-title">Abiertas Ahora</h6>
+                <p class="display-4" id="abiertas-ahora">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-door-closed fa-2x mb-2"></i>
+                <h6 class="card-title">Cerradas Ahora</h6>
+                <p class="display-4" id="cerradas-ahora">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-hospital fa-2x mb-2"></i>
+                <h6 class="card-title">Total Farmacias</h6>
+                <p class="display-4" id="total-farmacias">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h6 class="card-title">Hora Actual</h6>
+                <p class="display-4" id="hora-actual">-</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros de búsqueda -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-filter"></i> Filtros de Búsqueda</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('farmacias_web') }}" class="row g-3">
+            <div class="col-md-4">
+                <label for="comuna" class="form-label">Comuna</label>
+                <select class="form-select" id="comuna" name="comuna">
+                    <option value="">Todas las comunas</option>
+                    {% for comuna in comunas %}
+                        <option value="{{ comuna }}" {% if comuna == comuna_selected %}selected{% endif %}>
+                            {{ comuna }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="search" class="form-label">Buscar por nombre o dirección</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Ingrese texto a buscar...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resultados -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-list"></i> 
+            Resultados 
+            {% if farmacias %}
+                <span class="badge bg-secondary ms-2">{{ farmacias|length }}</span>
+            {% endif %}
+        </h5>
+        <div>
+            <button class="btn btn-sm btn-outline-primary" onclick="exportToCSV()">
+                <i class="fas fa-download"></i> Exportar CSV
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if farmacias %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="farmaciasTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Comuna</th>
+                            <th>Dirección</th>
+                            <th>Teléfono</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for farmacia in farmacias %}
+                            <tr>
+                                <td>{{ farmacia.id }}</td>
+                                <td>
+                                    <strong>{{ farmacia.local_nombre }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">{{ farmacia.comuna_nombre }}</span>
+                                </td>
+                                <td>{{ farmacia.local_direccion }}</td>
+                                <td>{{ farmacia.local_telefono }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ farmacia.funcionamiento_dia|title }}</span>
+                                </td>
+                                <td>
+                                    <small>
+                                        <i class="fas fa-clock"></i> 
+                                        {{ farmacia.funcionamiento_hora_apertura[:5] }} - {{ farmacia.funcionamiento_hora_cierre[:5] }}
+                                    </small>
+                                </td>
+                                <td class="farmacia-status" 
+                                    data-apertura="{{ farmacia.funcionamiento_hora_apertura|e }}" 
+                                    data-cierre="{{ farmacia.funcionamiento_hora_cierre|e }}" 
+                                    data-dia="{{ farmacia.funcionamiento_dia|e }}"
+                                    data-abierta="{{ farmacia.esta_abierta|default(false) }}">
+                                    {% if farmacia.esta_abierta %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-door-open"></i> Abierta
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-door-closed"></i> Cerrada
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('edit_farmacia', id=farmacia.id) }}" 
+                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn" 
+                                                data-id="{{ farmacia.id }}" 
+                                                data-name="{{ farmacia.local_nombre|e }}"
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info details-btn" 
+                                                data-id="{{ farmacia.id }}"
+                                                title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No se encontraron farmacias</h5>
+                <p class="text-muted">
+                    {% if search_query or comuna_selected %}
+                        No hay resultados para los filtros aplicados. 
+                        <a href="{{ url_for('farmacias_web') }}">Limpiar filtros</a>
+                    {% else %}
+                        No hay farmacias registradas. 
+                        <a href="{{ url_for('new_farmacia') }}">Agregar la primera farmacia</a>
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de detalles -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles de Farmacia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Función para mostrar detalles
+function showDetails(id) {
+    fetch(`/farmacias/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Información General</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>ID:</strong></td><td>${data.id}</td></tr>
+                            <tr><td><strong>Nombre:</strong></td><td>${data.nombre}</td></tr>
+                            <tr><td><strong>Comuna:</strong></td><td>${data.comuna}</td></tr>
+                            <tr><td><strong>Dirección:</strong></td><td>${data.direccion}</td></tr>
+                            <tr><td><strong>Teléfono:</strong></td><td>${data.telefono}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Horario de Atención</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Día:</strong></td><td>${data.dia_semana}</td></tr>
+                            <tr><td><strong>Apertura:</strong></td><td>${data.apertura}</td></tr>
+                            <tr><td><strong>Cierre:</strong></td><td>${data.cierre}</td></tr>
+                        </table>
+                        <div class="mt-3">
+                            <h6>Estado Actual</h6>
+                            <div id="modalStatus"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Verificar estado actual
+            const isOpen = checkOpenStatus(data.apertura, data.cierre, data.dia_semana);
+            const modalStatus = document.getElementById('modalStatus');
+            if (isOpen) {
+                modalStatus.innerHTML = '<span class="badge bg-success"><i class="fas fa-door-open"></i> Abierta ahora</span>';
+            } else {
+                modalStatus.innerHTML = '<span class="badge bg-danger"><i class="fas fa-door-closed"></i> Cerrada ahora</span>';
+            }
+            
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar los detalles');
+        });
+}
+
+// Event listeners para botones
+document.addEventListener('DOMContentLoaded', function() {
+    // Botones de eliminar
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            confirmDelete(id, name);
+        });
+    });
+    
+    // Botones de detalles
+    document.querySelectorAll('.details-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            showDetails(id);
+        });
+    });
+});
+
+// Función para verificar si está abierta
+function checkOpenStatus(apertura, cierre, diaSemana) {
+    const ahora = new Date();
+    const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const diaActual = dias[ahora.getDay()];
+    
+    if (diaSemana.toLowerCase() !== diaActual) {
+        return false;
+    }
+    
+    const horaActual = ahora.toTimeString().slice(0, 8);
+    return horaActual >= apertura && horaActual <= cierre;
+}
+
+// Función para exportar a CSV
+function exportToCSV() {
+    const table = document.getElementById('farmaciasTable');
+    let csv = [];
+    
+    // Headers
+    const headers = [];
+    table.querySelectorAll('thead th').forEach(th => {
+        headers.push(th.textContent.trim());
+    });
+    csv.push(headers.join(','));
+    
+    // Data
+    table.querySelectorAll('tbody tr').forEach(tr => {
+        const row = [];
+        tr.querySelectorAll('td').forEach((td, index) => {
+            if (index === 7) { // Columna de estado
+                const status = td.querySelector('.status-open, .status-closed');
+                row.push(status ? status.textContent.trim() : 'Desconocido');
+            } else if (index !== 8) { // Excluir columna de acciones
+                row.push(td.textContent.trim());
+            }
+        });
+        csv.push(row.join(','));
+    });
+    
+    // Download
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `farmacias_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Cargar estadísticas en tiempo real
+function cargarEstadisticas() {
+    fetch('/farmacias/estadisticas')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('abiertas-ahora').textContent = data.abiertas_ahora;
+            document.getElementById('cerradas-ahora').textContent = data.cerradas_ahora;
+            document.getElementById('total-farmacias').textContent = data.total_farmacias;
+            document.getElementById('hora-actual').textContent = data.hora_actual.substring(0, 5);
+        })
+        .catch(error => console.error('Error cargando estadísticas:', error));
+}
+
+// Actualizar estados de farmacias en tiempo real
+function actualizarEstadosFarmacias() {
+    document.querySelectorAll('.farmacia-status').forEach(element => {
+        const apertura = element.dataset.apertura;
+        const cierre = element.dataset.cierre;
+        const dia = element.dataset.dia;
+        
+        if (isOpen(apertura, cierre, dia)) {
+            element.innerHTML = '<span class="badge bg-success"><i class="fas fa-door-open"></i> Abierta</span>';
+        } else {
+            element.innerHTML = '<span class="badge bg-danger"><i class="fas fa-door-closed"></i> Cerrada</span>';
+        }
+    });
+}
+
+// Actualizar estadísticas y estados cada 30 segundos
+setInterval(() => {
+    cargarEstadisticas();
+    actualizarEstadosFarmacias();
+}, 30000);
+
+// Cargar estadísticas al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    cargarEstadisticas();
+    actualizarEstadosFarmacias();
+});
+</script>
+{% endblock %}

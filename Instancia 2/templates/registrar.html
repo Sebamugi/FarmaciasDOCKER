@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if farmacia %}
+        Editar Farmacia
+    {% else %}
+        Registrar Farmacia
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus"></i> Registrar Farmacia</h2>
+    <a href="{{ url_for('buscar_web') }}" class="btn btn-primary">
+        <i class="fas fa-search"></i> Buscar Farmacias
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-hospital"></i> Datos de la Farmacia</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="farmaciaForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="local_nombre" class="form-label">
+                                    <i class="fas fa-hospital"></i> Nombre de la Farmacia *
+                                </label>
+                                <input type="text" class="form-control" id="local_nombre" name="local_nombre" 
+                                       value="{{ datos.local_nombre if datos else '' }}" 
+                                       placeholder="Ej: Farmacia del Barrio" required maxlength="255">
+                                <div class="form-text">Máximo 255 caracteres</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="comuna_nombre" class="form-label">
+                                    <i class="fas fa-city"></i> Comuna *
+                                </label>
+                                <select class="form-select" id="comuna_nombre" name="comuna_nombre" required>
+                                    <option value="">Seleccione una comuna</option>
+                                    {% for comuna in comunas %}
+                                        <option value="{{ comuna }}" 
+                                                {% if datos and datos.comuna_nombre == comuna %}selected{% endif %}>
+                                            {{ comuna }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Seleccione una comuna de la lista</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="local_direccion" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Dirección *
+                        </label>
+                        <input type="text" class="form-control" id="local_direccion" name="local_direccion" 
+                               value="{{ datos.local_direccion if datos else '' }}" 
+                               placeholder="Ej: Av. Principal #123" required maxlength="255">
+                        <div class="form-text">Máximo 255 caracteres</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="local_telefono" class="form-label">
+                                    <i class="fas fa-phone"></i> Teléfono *
+                                </label>
+                                <input type="tel" class="form-control" id="local_telefono" name="local_telefono" 
+                                       value="{{ datos.local_telefono if datos else '' }}" 
+                                       placeholder="Ej: +56 2 23456789" required maxlength="50">
+                                <div class="form-text">Formato: +56 2 23456789</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="funcionamiento_dia" class="form-label">
+                                    <i class="fas fa-calendar-day"></i> Día de Atención *
+                                </label>
+                                <select class="form-select" id="funcionamiento_dia" name="funcionamiento_dia" required>
+                                    <option value="">Seleccione un día</option>
+                                    <option value="lunes" {% if datos and datos.funcionamiento_dia == 'lunes' %}selected{% endif %}>Lunes</option>
+                                    <option value="martes" {% if datos and datos.funcionamiento_dia == 'martes' %}selected{% endif %}>Martes</option>
+                                    <option value="miercoles" {% if datos and datos.funcionamiento_dia == 'miercoles' %}selected{% endif %}>Miércoles</option>
+                                    <option value="jueves" {% if datos and datos.funcionamiento_dia == 'jueves' %}selected{% endif %}>Jueves</option>
+                                    <option value="viernes" {% if datos and datos.funcionamiento_dia == 'viernes' %}selected{% endif %}>Viernes</option>
+                                    <option value="sabado" {% if datos and datos.funcionamiento_dia == 'sabado' %}selected{% endif %}>Sábado</option>
+                                    <option value="domingo" {% if datos and datos.funcionamiento_dia == 'domingo' %}selected{% endif %}>Domingo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="funcionamiento_hora_apertura" class="form-label">
+                                    <i class="fas fa-clock"></i> Hora de Apertura *
+                                </label>
+                                <input type="time" class="form-control" id="funcionamiento_hora_apertura" name="funcionamiento_hora_apertura" 
+                                       value="{{ datos.funcionamiento_hora_apertura[:5] if datos else '' }}" required>
+                                <div class="form-text">Formato: HH:MM</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="funcionamiento_hora_cierre" class="form-label">
+                                    <i class="fas fa-clock"></i> Hora de Cierre *
+                                </label>
+                                <input type="time" class="form-control" id="funcionamiento_hora_cierre" name="funcionamiento_hora_cierre" 
+                                       value="{{ datos.funcionamiento_hora_cierre[:5] if datos else '' }}" required>
+                                <div class="form-text">Formato: HH:MM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Información:</strong> Los campos marcados con * son obligatorios.
+                        La hora de apertura debe ser anterior a la hora de cierre.
+                        Los datos serán enviados al servidor maestro para su registro.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('buscar_web') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Registrar Farmacia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información adicional -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-question-circle"></i> Ayuda y Guía</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle"></i> Instrucciones de Registro</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Complete todos los campos obligatorios</li>
+                            <li><i class="fas fa-check text-success"></i> Seleccione una comuna de la lista disponible</li>
+                            <li><i class="fas fa-check text-success"></i> Proporcione un teléfono válido con formato +56</li>
+                            <li><i class="fas fa-check text-success"></i> Establezca horarios de atención coherentes</li>
+                            <li><i class="fas fa-check text-success"></i> Revise los datos antes de enviar</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-lightbulb"></i> Consejos Útiles</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-star text-warning"></i> Use nombres descriptivos para las farmacias</li>
+                            <li><i class="fas fa-star text-warning"></i> Incluya información adicional en la dirección</li>
+                            <li><i class="fas fa-star text-warning"></i> Verifique el formato del teléfono</li>
+                            <li><i class="fas fa-star text-warning"></i> Considere horarios de atención realistas</li>
+                            <li><i class="fas fa-star text-warning"></i> Seleccione el día principal de atención</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('farmaciaForm');
+    const aperturaInput = document.getElementById('funcionamiento_hora_apertura');
+    const cierreInput = document.getElementById('funcionamiento_hora_cierre');
+    
+    // Validación personalizada
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validar teléfono
+        const telefono = document.getElementById('local_telefono').value;
+        const phoneRegex = /^[\d\+\-\s\(\)]+$/;
+        if (!phoneRegex.test(telefono)) {
+            showAlert('El teléfono solo puede contener números, +, -, () y espacios', 'danger');
+            isValid = false;
+        }
+        
+        // Validar que la comuna esté seleccionada
+        const comuna = document.getElementById('comuna_nombre').value;
+        if (!comuna) {
+            showAlert('Debe seleccionar una comuna de la lista', 'danger');
+            isValid = false;
+        }
+        
+        // Validar horas
+        const apertura = aperturaInput.value;
+        const cierre = cierreInput.value;
+        
+        if (apertura >= cierre) {
+            showAlert('La hora de apertura debe ser anterior a la hora de cierre', 'danger');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+    
+    // Función para mostrar alertas
+    function showAlert(message, type) {
+        // Eliminar alertas existentes
+        const existingAlert = document.querySelector('.alert-dismissible');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Crear nueva alerta
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insertar antes del formulario
+        form.parentNode.insertBefore(alertDiv, form);
+        
+        // Auto-dismiss después de 5 segundos
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Auto-formato de teléfono
+    document.getElementById('local_telefono').addEventListener('input', function(e) {
+        let value = e.target.value;
+        // Permitir solo números, +, -, (), y espacios
+        value = value.replace(/[^\d\+\-\s\(\)]/g, '');
+        e.target.value = value;
+    });
+    
+    // Validación de horarios en tiempo real
+    function validateHorarios() {
+        const apertura = aperturaInput.value;
+        const cierre = cierreInput.value;
+        
+        if (apertura && cierre) {
+            if (apertura >= cierre) {
+                cierreInput.setCustomValidity('La hora de cierre debe ser posterior a la apertura');
+            } else {
+                cierreInput.setCustomValidity('');
+            }
+        }
+    }
+    
+    aperturaInput.addEventListener('change', validateHorarios);
+    cierreInput.addEventListener('change', validateHorarios);
+    
+    // Sugerencia de comunas si no hay disponibles
+    const comunaSelect = document.getElementById('comuna');
+    if (comunaSelect.options.length <= 1) {
+        showAlert('No hay comunas disponibles. Contacte al administrador.', 'warning');
+    }
+});
+</script>
+{% endblock %}

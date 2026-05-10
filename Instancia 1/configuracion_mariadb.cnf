@@ -1,0 +1,12 @@
+# Configuración de MariaDB para permitir conexiones remotas
+# Este archivo debe ser colocado en /etc/my.cnf.d/mariadb-server.cnf
+
+[mysqld]
+# Permitir conexiones desde cualquier IP
+bind-address = 0.0.0.0
+
+# Configuración adicional recomendada
+max_connections = 200
+innodb_buffer_pool_size = 256M
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Portal Farmacias{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">
+                    <i class="fas fa-hospital"></i>
+                    Portal de Farmacias
+                </h1>
+                <p class="lead">
+                    Busca y registra farmacias de forma fácil y rápida
+                </p>
+                <p>
+                    Interfaz cliente conectada al servidor maestro para consulta y registro de farmacias.
+                </p>
+                <div class="mt-4">
+                    <a href="{{ url_for('buscar_web') }}" class="btn btn-light btn-lg me-3" role="button">
+                        <i class="fas fa-search"></i> Buscar Farmacias
+                    </a>
+                    <a href="{{ url_for('registrar_form') }}" class="btn btn-outline-light btn-lg" role="button">
+                        <i class="fas fa-plus"></i> Registrar Farmacia
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-hospital-alt fa-5x mb-3"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Búsqueda Avanzada</h5>
+                    <p class="card-text">
+                        Busca farmacias por comuna, nombre o dirección. Filtra por horarios de atención.
+                    </p>
+                    <a href="{{ url_for('buscar_web') }}" class="btn btn-primary">Buscar Ahora</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Registro Fácil</h5>
+                    <p class="card-text">
+                        Registra nuevas farmacias con validación de datos y horarios de atención.
+                    </p>
+                    <a href="{{ url_for('registrar_form') }}" class="btn btn-success">Registrar Ahora</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Horarios en Vivo</h5>
+                    <p class="card-text">
+                        Verifica en tiempo real si las farmacias están abiertas o cerradas.
+                    </p>
+                    <a href="{{ url_for('buscar_web') }}?abiertas=true" class="btn btn-warning">Ver Abiertas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Características del Portal</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Búsqueda por comuna y texto
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Verificación de horarios en tiempo real
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Registro de nuevas farmacias
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Interfaz moderna y responsiva
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Conexión con servidor maestro
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-network-wired"></i> Arquitectura del Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="p-3">
+                                <i class="fas fa-server fa-2x text-primary"></i>
+                                <h6 class="mt-2">Servidor Maestro</h6>
+                                <small class="text-muted">Instancia 1</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3">
+                                <i class="fas fa-desktop fa-2x text-success"></i>
+                                <h6 class="mt-2">Cliente Actual</h6>
+                                <small class="text-muted">Instancia 2</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="text-muted small">
+                        Portal cliente conectado al servidor maestro para consulta y registro de farmacias.
+                    </p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Estado:</strong> Conectado al servidor maestro
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-question-circle"></i> ¿Cómo usar el portal?</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fw-bold">1</span>
+                        </div>
+                    </div>
+                    <h6 class="text-center">Buscar Farmacias</h6>
+                    <p class="text-muted small">
+                        Usa la búsqueda avanzada para encontrar farmacias por comuna, nombre o dirección.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center mb-3">
+                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fw-bold">2</span>
+                        </div>
+                    </div>
+                    <h6 class="text-center">Verificar Horarios</h6>
+                    <p class="text-muted small">
+                        Consulta si las farmacias están abiertas en este momento según sus horarios.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center mb-3">
+                        <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fw-bold">3</span>
+                        </div>
+                    </div>
+                    <h6 class="text-center">Registrar Nueva</h6>
+                    <p class="text-muted small">
+                        Agrega nuevas farmacias al sistema con todos sus datos de contacto y horarios.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
