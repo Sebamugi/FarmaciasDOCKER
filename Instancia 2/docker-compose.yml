@@ -6,7 +6,7 @@ services:
     ports:
       - "80:80"
     environment:
-      URL_MAESTRA: http://172.31.xx.xx:5000/farmacias
+      URL_MAESTRA: http://32.197.236.185/Farmacias_api.php
     volumes:
       - .:/app
     restart: unless-stopped

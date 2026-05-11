@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Base de datos MariaDB
+  mariadb:
+    image: mariadb:10.5
+    container_name: farmacias-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: farmacias_db
+      MYSQL_USER: api_user
+      MYSQL_PASSWORD: tu_password_seguro
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./setup_database.sql:/docker-entrypoint-initdb.d/setup.sql:ro
+    command: --bind-address=0.0.0.0
+    networks:
+      - farmacias-network
+
+  # Servidor de aplicaciones
+  app:
+    image: sebamugi/farmacias-server:latest
+    container_name: farmacias-server
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: mariadb
+      DB_USER: api_user
+      DB_PASSWORD: tu_password_seguro
+      DB_DATABASE: farmacias_db
+      FLASK_ENV: production
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - farmacias-network
+
+volumes:
+  mariadb_data:
+    driver: local
+
+networks:
+  farmacias-network:
+    driver: bridge

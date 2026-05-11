@@ -23,7 +23,7 @@
                 <h5><i class="fas fa-hospital"></i> Datos de la Farmacia</h5>
             </div>
             <div class="card-body">
-                <form method="POST" id="farmaciaForm">
+                <form method="POST" action="{{ url_for('registrar_web') }}" id="farmaciaForm">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -43,12 +43,16 @@
                                 </label>
                                 <select class="form-select" id="comuna_nombre" name="comuna_nombre" required>
                                     <option value="">Seleccione una comuna</option>
-                                    {% for comuna in comunas %}
-                                        <option value="{{ comuna }}" 
-                                                {% if datos and datos.comuna_nombre == comuna %}selected{% endif %}>
-                                            {{ comuna }}
-                                        </option>
-                                    {% endfor %}
+                                    {% if comunas %}
+                                        {% for comuna in comunas %}
+                                            <option value="{{ comuna }}" 
+                                                    {% if datos and datos.comuna_nombre == comuna %}selected{% endif %}>
+                                                {{ comuna }}
+                                            </option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="" disabled>No hay comunas disponibles</option>
+                                    {% endif %}
                                 </select>
                                 <div class="form-text">Seleccione una comuna de la lista</div>
                             </div>

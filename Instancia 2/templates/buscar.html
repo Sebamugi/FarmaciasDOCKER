@@ -64,19 +64,23 @@
         <form method="GET" action="{{ url_for('buscar_web') }}" class="row g-3">
             <div class="col-md-3">
                 <label for="comuna" class="form-label">Comuna</label>
-                <select class="form-select" id="comuna" name="comuna" required>
-                    <option value="">Seleccione una comuna</option>
-                    {% for comuna in comunas %}
-                        <option value="{{ comuna }}" {% if comuna == comuna_selected %}selected{% endif %}>
-                            {{ comuna }}
-                        </option>
-                    {% endfor %}
+                <select class="form-select" id="comuna" name="comuna">
+                    <option value="">Todas las comunas</option>
+                    {% if comunas %}
+                        {% for comuna in comunas %}
+                            <option value="{{ comuna }}" {% if comuna == comuna_selected %}selected{% endif %}>
+                                {{ comuna }}
+                            </option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="" disabled>No hay comunas disponibles</option>
+                    {% endif %}
                 </select>
             </div>
             <div class="col-md-4">
-                <label for="search" class="form-label">Buscar por nombre o dirección</label>
+                <label for="search" class="form-label">Buscar por nombre, dirección o comuna</label>
                 <input type="text" class="form-control" id="search" name="search" 
-                       value="{{ search_query }}" placeholder="Ingrese texto a buscar...">
+                       value="{{ search_query }}" placeholder="Ej: Farmacia del Barrio, Ahumada, Providencia...">
             </div>
             <div class="col-md-3">
                 <label for="abiertas" class="form-label">Estado</label>
@@ -389,7 +393,7 @@ function exportResults() {
 
 // Cargar estadísticas en tiempo real
 function cargarEstadisticas() {
-    fetch('/farmacias/estadisticas')
+    fetch('/estadisticas')
         .then(response => response.json())
         .then(data => {
             document.getElementById('abiertas-ahora').textContent = data.abiertas_ahora;
