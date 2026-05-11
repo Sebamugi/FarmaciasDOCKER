@@ -204,43 +204,8 @@ GRANT ALL PRIVILEGES ON farmacias_db.* TO 'api_user'@'%';
 - Total por comuna
 - Hora actual del sistema (Chile)
 
-## 🐛 Errores Corregidos
 
-### Problemas Resueltos
-- ✅ **Procesamiento de comunas**: API devuelve array de strings, no objetos
-- ✅ **Form action**: Corregido a `/registrar_web`
-- ✅ **bind_param**: Corregido mismatch 7 campos vs 6 parámetros
-- ✅ **Logging**: Implementado logging detallado para depuración
-- ✅ **Zona horaria**: Configurada para Chile (America/Santiago)
 
-## 🤝 Contribuciones
-
-1. Fork del repositorio
-2. Crear feature branch
-3. Realizar cambios
-4. Hacer commit
-5. Push al branch
-6. Crear Pull Request
-
-## 📄 Licencia
-
-MIT License - Ver archivo LICENSE para detalles
-
-## 📞 Soporte
-
-- **Issues**: GitHub Issues
-- **Documentación**: Este README
-- **Email**: Contactar vía GitHub
-
-## 🔄 Versiones
-
-- **v1.0**: Sistema básico con API PHP
-- **v2.0**: Interfaz Flask completa
-- **v2.1**: Estructura de datos real
-- **v2.2**: Verificación de horarios en tiempo real
-- **v2.3**: Corrección de errores críticos y logging
-
----
 
 **Desarrollado por**: Sebamugi  
 **Última actualización**: Mayo 2026  
