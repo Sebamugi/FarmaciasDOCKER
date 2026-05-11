@@ -211,31 +211,54 @@ def registrar_web():
         return render_template('registrar.html', comunas=comunas, datos=datos)
     
     try:
-        print(f"Enviando datos a API: {URL_MAESTRA}")
-        print(f"Datos: {datos}")
+        print(f"=== INICIANDO REGISTRO ===")
+        print(f"URL_MAESTRA: {URL_MAESTRA}")
+        print(f"Datos a enviar: {datos}")
+        print(f"Headers: Content-Type: application/json")
         
         response = requests.post(URL_MAESTRA, json=datos, timeout=10)
-        print(f"Response status: {response.status_code}")
-        print(f"Response content: {response.text}")
+        
+        print(f"=== RESPUESTA SERVIDOR ===")
+        print(f"Status Code: {response.status_code}")
+        print(f"Headers: {dict(response.headers)}")
+        print(f"Response Text: {response.text}")
+        print(f"Response Length: {len(response.text)} caracteres")
+        
+        # Intentar parsear JSON
+        try:
+            response_json = response.json()
+            print(f"Response JSON: {response_json}")
+        except:
+            print("Response no es JSON válido")
+            response_json = None
         
         if response.status_code == 201:
+            print("✅ REGISTRO EXITOSO")
             flash('Farmacia registrada exitosamente', 'success')
             return redirect(url_for('buscar_web'))
         else:
-            try:
-                result = response.json()
-                error_msg = result.get('message', 'Error desconocido')
-                print(f"Error API: {error_msg}")
+            print("❌ ERROR EN REGISTRO")
+            if response_json:
+                error_msg = response_json.get('message', response_json.get('error', 'Error desconocido'))
+                print(f"Error desde API (JSON): {error_msg}")
                 flash(f"Error al registrar: {error_msg}", 'error')
-            except:
-                print(f"Response no es JSON: {response.text}")
+            else:
+                print(f"Error desde API (texto): {response.text}")
                 flash(f"Error al registrar: {response.text}", 'error')
+                
     except requests.exceptions.Timeout:
-        print("Error: Timeout de conexión")
-        flash('Error de conexión: Tiempo de espera agotado', 'error')
+        print("❌ TIMEOUT - El servidor maestro no responde en 10 segundos")
+        flash('Error: Timeout al conectar con el servidor maestro', 'error')
+    except requests.exceptions.ConnectionError:
+        print("❌ CONNECTION ERROR - No se puede conectar al servidor maestro")
+        flash('Error: No se puede conectar con el servidor maestro', 'error')
+    except requests.exceptions.RequestException as e:
+        print(f"❌ REQUEST ERROR - Error en la petición: {e}")
+        flash(f'Error en la petición: {e}', 'error')
     except Exception as e:
-        print(f"Error general: {str(e)}")
-        flash(f"Error de conexión: {str(e)}", 'error')
+        print(f"❌ ERROR INESPERADO: {e}")
+        print(f"Tipo de error: {type(e).__name__}")
+        flash(f'Error inesperado: {e}', 'error')
     
     return render_template('registrar.html', comunas=comunas, datos=datos)
 
