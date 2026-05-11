@@ -88,14 +88,15 @@ def buscar_web():
     try:
         comunas_response = requests.get(f"{URL_MAESTRA}?comunas=true", timeout=5)
         if comunas_response.status_code == 200:
-            # Extraer solo nombres de comunas únicos
-            farmacias_data = comunas_response.json()
-            comunas = sorted(list(set(farmacia.get('comuna_nombre', '') for farmacia in farmacias_data if farmacia.get('comuna_nombre'))))
+            # La API ya devuelve lista de comunas únicas
+            comunas = comunas_response.json()
+            comunas = sorted(comunas) if comunas else []
         else:
             comunas = []
     except requests.exceptions.Timeout:
         comunas = []
-    except:
+    except Exception as e:
+        print(f"Error obteniendo comunas: {e}")
         comunas = []
     
     farmacias = []
@@ -163,14 +164,15 @@ def registrar_form():
     try:
         comunas_response = requests.get(f"{URL_MAESTRA}?comunas=true", timeout=5)
         if comunas_response.status_code == 200:
-            # Extraer solo nombres de comunas únicos
-            farmacias_data = comunas_response.json()
-            comunas = sorted(list(set(farmacia.get('comuna_nombre', '') for farmacia in farmacias_data if farmacia.get('comuna_nombre'))))
+            # La API ya devuelve lista de comunas únicas
+            comunas = comunas_response.json()
+            comunas = sorted(comunas) if comunas else []
         else:
             comunas = []
     except requests.exceptions.Timeout:
         comunas = []
-    except:
+    except Exception as e:
+        print(f"Error obteniendo comunas: {e}")
         comunas = []
     
     return render_template('registrar.html', comunas=comunas)
@@ -196,14 +198,15 @@ def registrar_web():
         try:
             comunas_response = requests.get(f"{URL_MAESTRA}?comunas=true", timeout=5)
             if comunas_response.status_code == 200:
-                # Extraer solo nombres de comunas únicos
-                farmacias_data = comunas_response.json()
-                comunas = sorted(list(set(farmacia.get('comuna_nombre', '') for farmacia in farmacias_data if farmacia.get('comuna_nombre'))))
+                # La API ya devuelve lista de comunas únicas
+                comunas = comunas_response.json()
+                comunas = sorted(comunas) if comunas else []
             else:
                 comunas = []
         except requests.exceptions.Timeout:
             comunas = []
-        except:
+        except Exception as e:
+            print(f"Error obteniendo comunas en error: {e}")
             comunas = []
         return render_template('registrar.html', comunas=comunas, datos=datos)
     

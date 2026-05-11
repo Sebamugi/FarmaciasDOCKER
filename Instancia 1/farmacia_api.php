@@ -24,7 +24,7 @@ if ($metodo == 'POST') {
     $datos = json_decode($json, true);
 
     if (isset($datos['local_nombre'])) {
-        $stmt = $conexion->prepare("INSERT INTO turnos (local_nombre, comuna_nombre, local_direccion, local_telefono, funcionamiento_dia, funcionamiento_hora_apertura, funcionamiento_hora_cierre) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $conexion->prepare("INSERT INTO turnos (local_nombre, comuna_nombre, local_direccion, local_telefono, funcionamiento_dia, funcionamiento_hora_apertura, funcionamiento_hora_cierre) VALUES (?, ?, ?, ?, ?, ?, ?)");
         
         $stmt->bind_param("sssssss", 
             $datos['local_nombre'], 
