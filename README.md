@@ -4,34 +4,31 @@ Sistema completo de gestión de farmacias con arquitectura distribuida en AWS Cl
 
 ## 🏗️ Arquitectura
 
-### Instancia 1 - Servidor Maestro
+### Instancia 1 - Servidor Maestro (API PHP)
 - **Base de Datos**: MariaDB con estructura de datos real del gobierno
 - **API RESTful**: Endpoints completos para CRUD de farmacias
-- **Interfaz Web**: Dashboard con gestión visual completa
+- **Endpoint Principal**: `http://32.197.236.185/Farmacias_api.php`
 - **Validaciones**: Verificación de horarios en tiempo real
 
-### Instancia 2 - Cliente Docker
+### Instancia 2 - Cliente Flask (Portal Web)
 - **Portal Público**: Interfaz de búsqueda y registro
 - **Consumo API**: Conexión con servidor maestro
 - **Validación Local**: Validación básica de datos
-
-### Instancia 3 - Réplica Automática
-- **Despliegue**: Scripts automatizados
-- **Docker Hub**: Imágenes preconfiguradas
+- **Docker**: Contenedor completo para producción
 
 ## 🚀 Características Principales
 
 ### ✅ Funcionalidades Completas
-- **CRUD Visual**: Crear, leer, actualizar, eliminar farmacias
 - **Búsqueda Avanzada**: Por comuna, nombre, dirección
+- **Registro de Farmacias**: Formulario completo con validaciones
 - **Verificación de Horarios**: Estado en tiempo real basado en hora del sistema
-- **Estadísticas Interactivas**: Gráficos con Chart.js
-- **Exportación de Datos**: CSV y reportes
+- **Estadísticas Interactivas**: Contador de farmacias abiertas/cerradas
+- **Filtros Dinámicos**: Comunas y búsqueda textual
 
 ### 🎨 Interfaz Moderna
 - **Bootstrap 5**: Diseño responsivo y moderno
 - **Font Awesome**: Iconos profesionales
-- **Actualización Automática**: Estados actualizados cada 30 segundos
+- **Actualización Automática**: Estados actualizados dinámicamente
 - **Indicadores Visuales**: Badges de estado (abierta/cerrada)
 
 ### 🔧 Características Técnicas
@@ -39,9 +36,30 @@ Sistema completo de gestión de farmacias con arquitectura distribuida en AWS Cl
 - **Validaciones**: Servidor y cliente
 - **Seguridad**: Sanitización de datos y protección XSS
 - **Docker**: Contenerización completa
+- **Logging Detallado**: Para depuración y monitoreo
 
 ## 📊 Estructura de Datos
 
+### Tabla: turnos
+```sql
+CREATE TABLE turnos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fecha DATE,
+    local_id VARCHAR(50),
+    local_nombre VARCHAR(255),
+    comuna_nombre VARCHAR(100),
+    localidad_nombre VARCHAR(100),
+    local_direccion VARCHAR(255),
+    funcionamiento_hora_apertura TIME,
+    funcionamiento_hora_cierre TIME,
+    funcionamiento_dia VARCHAR(20),
+    fk_region VARCHAR(10),
+    fk_comuna VARCHAR(10),
+    local_telefono VARCHAR(50)
+);
+```
+
+### Estructura JSON
 ```json
 {
     "id": "34",
@@ -64,68 +82,44 @@ Sistema completo de gestión de farmacias con arquitectura distribuida en AWS Cl
 
 ### Requisitos
 - Python 3.9+
-- Docker y Docker Compose
-- AWS EC2 (3 instancias)
+- Docker y Docker Hub
+- AWS EC2
 - MariaDB
 
-### Instancia 1 - Servidor Maestro
+### Instancia 1 - Servidor Maestro (API PHP)
 
 ```bash
 # Clonar repositorio
 git clone https://github.com/Sebamugi/FarmaciasDOCKER.git
 cd FarmaciasDocker/Instancia\ 1
 
-# Instalar dependencias
-pip install -r requirements.txt
-
 # Configurar base de datos
 mysql -u root -p < setup_database.sql
 
-# Iniciar servidor
-python server_api.py
+# Configurar Apache (si aplica)
+# Copiar farmacia_api.php a /var/www/html/
 ```
 
-### Docker Compose (Recomendado)
+### Instancia 2 - Cliente Flask (Docker)
 
 ```bash
-# En Instancia 1
-cd Instancia\ 1
-docker-compose up -d
-
-# En Instancia 2
+# Construir imagen Docker
 cd Instancia\ 2
-docker-compose up -d
-```
+docker build -t farmacias-client:latest .
 
-### Instancia 2 - Cliente
+# Ejecutar contenedor
+docker run -d --name app_cliente -p 80:80 farmacias-client:latest
 
-```bash
-cd Instancia\ 2
-pip install -r requirements.txt
-python app.py
-```
-
-### Instancia 3 - Despliegue Automático
-
-```bash
-cd Instancia\ 3
-chmod +x *.sh
-./despliegue_dockerhub.sh
+# O usar desde Docker Hub
+docker run -d --name app_cliente -p 80:80 sebamugi/farmacias-client:latest
 ```
 
 ## 📡 API Endpoints
 
 ### Endpoints Principales
-- `GET /farmacias` - Listar farmacias
-- `POST /farmacias` - Crear farmacia
-- `GET /farmacias/{id}` - Obtener farmacia
-- `PUT /farmacias/{id}` - Actualizar farmacia
-- `DELETE /farmacias/{id}` - Eliminar farmacia
-
-### Endpoints Especiales
-- `GET /farmacias/comunas` - Listar comunas
-- `GET /farmacias/estadisticas` - Estadísticas completas
-- `GET /farmacias/abiertas` - Farmacias abiertas ahora
+- `GET /Farmacias_api.php` - Listar farmacias
+- `POST /Farmacias_api.php` - Crear farmacia
+- `GET /Farmacias_api.php?comunas=true` - Listar comunas únicas
 
 ### Parámetros de Búsqueda
 - `?comuna=nombre` - Filtrar por comuna
@@ -134,32 +128,28 @@ chmod +x *.sh
 
 ## 🌐 Interfaces Web
 
-### Instancia 1 - Servidor Maestro
-- **Dashboard**: `http://localhost:5000/`
-- **Gestión**: `http://localhost:5000/farmacias_web`
-- **Estadísticas**: `http://localhost:5000/estadisticas`
-
-### Instancia 2 - Cliente
-- **Portal**: `http://localhost/`
+### Instancia 2 - Cliente Flask
+- **Portal Principal**: `http://localhost/`
 - **Búsqueda**: `http://localhost/buscar`
 - **Registro**: `http://localhost/registrar_form`
+- **Estadísticas**: `http://localhost/estadisticas`
 
 ## ⏰ Verificación de Horarios
 
 El sistema verifica automáticamente si las farmacias están abiertas basándose en:
 
-1. **Hora del Sistema**: Usa `datetime.now()`
+1. **Hora del Sistema**: Usa `datetime.now()` con timezone Chile
 2. **Día de Semana**: Mapeo a español
 3. **Horario Configurado**: Rango apertura-cierre
-4. **Actualización Automática**: Cada 30 segundos
+4. **Actualización Automática**: En cada consulta
 
 ### Lógica de Verificación
 ```python
 def esta_abierta(farmacia):
-    ahora = datetime.now()
+    ahora = datetime.now(pytz.timezone('America/Santiago'))
     dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
     dia_actual = dias[ahora.weekday()]
-    hora_actual = ahora.strftime('%H:%M:%S')
+    hora_actual = ahora.strftime('%H:%M')
     
     return (farmacia['funcionamiento_dia'].lower() == dia_actual and 
             farmacia['funcionamiento_hora_apertura'] <= hora_actual <= farmacia['funcionamiento_hora_cierre'])
@@ -167,16 +157,14 @@ def esta_abierta(farmacia):
 
 ## 🔧 Configuración
 
-### Variables de Entorno
-```bash
-DB_HOST=localhost
-DB_USER=api_user
-DB_PASSWORD=tu_password_seguro
-DB_DATABASE=farmacias_db
-URL_MAESTRA=http://172.31.xx.xx:5000/farmacias
+### Variables de Entorno (Instancia 2)
+```python
+# En app.py
+URL_MAESTRA = "http://32.197.236.185/Farmacias_api.php"
+SECRET_KEY = '1231234'
 ```
 
-### Base de Datos
+### Base de Datos (Instancia 1)
 ```sql
 CREATE DATABASE farmacias_db;
 CREATE USER 'api_user'@'%' IDENTIFIED BY 'tu_password_seguro';
@@ -185,19 +173,18 @@ GRANT ALL PRIVILEGES ON farmacias_db.* TO 'api_user'@'%';
 
 ## 📱 Tecnologías Utilizadas
 
-- **Backend**: Python 3.9, Flask
+- **Backend**: PHP 8.0 (Instancia 1), Python 3.9 + Flask (Instancia 2)
 - **Base de Datos**: MariaDB 10.5
-- **Frontend**: Bootstrap 5, Font Awesome 6, Chart.js
-- **Contenerización**: Docker, Docker Compose
+- **Frontend**: Bootstrap 5, Font Awesome 6
+- **Contenerización**: Docker
 - **Nube**: AWS EC2, Docker Hub
 - **Comunicación**: HTTP/HTTPS, REST API
 
 ## 🚀 Despliegue en AWS
 
 ### Configuración de Instancias
-1. **Instancia 1**: t2.micro (Servidor Maestro)
-2. **Instancia 2**: t2.micro (Cliente)
-3. **Instancia 3**: t2.micro (Réplica)
+1. **Instancia 1**: EC2 con API PHP y MariaDB
+2. **Instancia 2**: EC2 con contenedor Docker del cliente Flask
 
 ### Seguridad
 - Configurar Security Groups
@@ -208,15 +195,23 @@ GRANT ALL PRIVILEGES ON farmacias_db.* TO 'api_user'@'%';
 ## 📊 Monitoreo y Logs
 
 ### Logs del Sistema
-- **Servidor API**: `api.log`
-- **Cliente**: `client.log`
-- **Docker**: `docker logs`
+- **API PHP**: Logs de Apache/PHP
+- **Cliente Flask**: Logging detallado implementado
+- **Docker**: `docker logs app_cliente`
 
 ### Estadísticas en Tiempo Real
 - Farmacias abiertas/cerradas
 - Total por comuna
-- Distribución por día
-- Hora actual del sistema
+- Hora actual del sistema (Chile)
+
+## 🐛 Errores Corregidos
+
+### Problemas Resueltos
+- ✅ **Procesamiento de comunas**: API devuelve array de strings, no objetos
+- ✅ **Form action**: Corregido a `/registrar_web`
+- ✅ **bind_param**: Corregido mismatch 7 campos vs 6 parámetros
+- ✅ **Logging**: Implementado logging detallado para depuración
+- ✅ **Zona horaria**: Configurada para Chile (America/Santiago)
 
 ## 🤝 Contribuciones
 
@@ -234,18 +229,20 @@ MIT License - Ver archivo LICENSE para detalles
 ## 📞 Soporte
 
 - **Issues**: GitHub Issues
-- **Documentación**: Wiki del proyecto
-- **Email**: soporte@farmacias.cl
+- **Documentación**: Este README
+- **Email**: Contactar vía GitHub
 
 ## 🔄 Versiones
 
-- **v1.0**: Sistema básico con API
-- **v2.0**: Interfaz web completa
+- **v1.0**: Sistema básico con API PHP
+- **v2.0**: Interfaz Flask completa
 - **v2.1**: Estructura de datos real
 - **v2.2**: Verificación de horarios en tiempo real
+- **v2.3**: Corrección de errores críticos y logging
 
 ---
 
 **Desarrollado por**: Sebamugi  
-**Última actualización**: Mayo 2024  
-**Estado**: ✅ Producción Ready
+**Última actualización**: Mayo 2026  
+**Estado**: ✅ Producción Ready  
+**Repositorio**: https://github.com/Sebamugi/FarmaciasDOCKER.git
